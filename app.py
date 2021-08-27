@@ -128,7 +128,7 @@ def load_stock_price_df():
     - stockName : 종목명
     '''
 
-    file_path = '{}/stock_2018_prices.pkl'.format(DATA_PATH)8
+    file_path = '{}/stock_2018_prices.pkl'.format(DATA_PATH)
     price_df = pd.read_pickle(file_path)
 
     #price_df = price_df.stack().reset_index()
