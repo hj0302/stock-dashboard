@@ -51,19 +51,6 @@ time_options = [
     {"label": time, "value": time} for time in time_list
 ]
 
-stock_info_df = load_stock_info_df()
-stock_info_df = stock_info_df[stock_info_df['sectorName'] == input_sectorName]
-
-stock_price_df = load_stock_price_df()
-
-stock_price_df = stock_price_df[stock_price_df['date'] >= '20180101']
-
-sector_df = pd.merge(stock_price_df, stock_info_df[['stockCode', 'stockName', 'sectorName']], on =['stockCode', 'stockName'])
-
-date_df = sector_df[['date']].drop_duplicates()
-date_df['date'] = date_df['date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
-date_list = date_df['date'].unique().tolist()
-    
 def check_closed_day(day):
     while True:
         if day in date_list :
@@ -144,6 +131,19 @@ def load_stock_price_df():
     price_df.drop('Code_Name', axis=1, inplace=True)
     
     return price_df
+ 
+stock_info_df = load_stock_info_df()
+stock_info_df = stock_info_df[stock_info_df['sectorName'] == input_sectorName]
+
+stock_price_df = load_stock_price_df()
+
+stock_price_df = stock_price_df[stock_price_df['date'] >= '20180101']
+
+sector_df = pd.merge(stock_price_df, stock_info_df[['stockCode', 'stockName', 'sectorName']], on =['stockCode', 'stockName'])
+
+date_df = sector_df[['date']].drop_duplicates()
+date_df['date'] = date_df['date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
+date_list = date_df['date'].unique().tolist()
 
 layout = dict(
     autosize=True,
