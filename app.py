@@ -1,4 +1,7 @@
-# Import required libraries
+# -*- coding: utf-8 -*-
+
+# Run this app with `python app.py` and
+# visit http://127.0.0.1:8050/ in your web browser.
 import pickle
 import copy
 import pathlib
@@ -30,6 +33,7 @@ app.title = "Analysis of stock market"
 server = app.server
 
 # Create controls
+
 sector_list = ['제약', '자동차', '의류', '보험', '식품,음료', '운송', '복합기업', '포장재,종이와목재',
             '건설,건축제품,건축자재', '자동차부품', '에너지', '비철금속', '기계', '전기장비', '철강', '반도체',
             '핸드셋', '화학', '통신서비스', '상사', '증권', '디스플레이장비', '전기제품', '미디어',
@@ -47,7 +51,7 @@ sector_options = [
 time_options = [
     {"label": time, "value": time} for time in time_list
 ]
-
+@profile
 def check_closed_day(day):
     while True:
         if day in date_list :
@@ -57,6 +61,7 @@ def check_closed_day(day):
             day = datetime.datetime.strftime(day, '%Y-%m-%d')
 
 # 입력일자가 토요일, 일요일이면 해당 주 금요일로 변경하는 함수 
+@profile
 def check_week(day):
     week_day = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
     
@@ -70,6 +75,7 @@ def check_week(day):
         return datetime.datetime.strftime(day, '%Y-%m-%d')
 
 # 분석일자 세팅하는 함수
+@profile
 def setting_date(date):
     ago_1_day = datetime.datetime.strptime(date, '%Y-%m-%d') - datetime.timedelta(days=1)#하루전
     ago_7_day = datetime.datetime.strptime(date, '%Y-%m-%d') - datetime.timedelta(weeks=1)#일주일전
@@ -97,6 +103,7 @@ def setting_date(date):
 
 # Load data
 # 종목 리스트 (안에 섹터정보 포함)
+@profile
 def load_stock_info_df():
     '''
     주요 필드
@@ -105,12 +112,13 @@ def load_stock_info_df():
     - sectorName : 섹터명
     - industry_index_name : {시장}_{규모} (시장: Kospi/Kosdaq, 규모: L/M/S)
     '''
-    file_path = '/Users/munhyeonjong/Desktop/dash/stock/data/stock_list.json'
+    file_path = '{}/stock_list.json'.format(DATA_PATH)
     with open(file_path) as f:
         stock_list = [json.loads(line) for line in f]
     return pd.DataFrame(stock_list)
 
 # 일별/종목별 주가 테이블
+@profile
 def load_stock_price_df():
     '''
     테이블 형식
@@ -119,8 +127,9 @@ def load_stock_price_df():
     - stockCode : 종목코드
     - stockName : 종목명
     '''
-    file_path = '/Users/munhyeonjong/Desktop/dash/stock/data/stock_prices.pkl'
+    file_path = '{}/stock_prices.pkl'.format(DATA_PATH)
     price_df = pd.read_pickle(file_path)
+    price_df
 
     price_df = price_df.stack().reset_index()
     price_df.columns = ['date', 'Code_Name', 'price']
@@ -307,13 +316,13 @@ app.layout = html.Div(
     id="mainContainer",
     style={"display": "flex", "flex-direction": "column"},
 )
-
+@profile
 def update_date(date_value):
     if date_value is not None:
         date_object = date.fromisoformat(date_value)
         date_string = date_object.strftime('%Y-%m-%d')
         return date_string
-
+@profile
 def calc_RSI(df, period):
     U = np.where(df.diff(1)['price'] >  0, df.diff(1)['price'], 0)
     D = np.where(df.diff(1)['price'] <  0, df.diff(1)['price'] * (-1), 0)
@@ -324,6 +333,7 @@ def calc_RSI(df, period):
     return RSI
 
 # Selectors -> well text
+@profile
 @app.callback(
     Output("sector_count", "children"),
     [
@@ -337,6 +347,7 @@ def update_sector_count(input_sectorName):
     return sector_n_count
 
 # Selectors -> well text
+@profile
 @app.callback(
     Output("ago_1_earnings", "children"),
     Output("ago_7_earnings", "children"),
@@ -351,6 +362,7 @@ def update_sector_count(input_sectorName):
         Input("y_option", "value"),
     ],
 )
+@profile
 def update_sector_count(input_sectorName, input_anal_date, input_comp_date, xaxis_option, yaxis_option):
     sector_sub_df = sector_df[sector_df['sectorName'] == input_sectorName]
 
