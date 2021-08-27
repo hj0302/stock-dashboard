@@ -51,6 +51,19 @@ time_options = [
     {"label": time, "value": time} for time in time_list
 ]
 
+stock_info_df = load_stock_info_df()
+stock_info_df = stock_info_df[stock_info_df['sectorName'] == input_sectorName]
+
+stock_price_df = load_stock_price_df()
+
+stock_price_df = stock_price_df[stock_price_df['date'] >= '20180101']
+
+sector_df = pd.merge(stock_price_df, stock_info_df[['stockCode', 'stockName', 'sectorName']], on =['stockCode', 'stockName'])
+
+date_df = sector_df[['date']].drop_duplicates()
+date_df['date'] = date_df['date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
+date_list = date_df['date'].unique().tolist()
+    
 def check_closed_day(day):
     while True:
         if day in date_list :
@@ -153,20 +166,6 @@ app.layout = html.Div(
             [
                 html.Div(
                     [
-                        html.Img(
-                            src=app.get_asset_url("vaivcompany_ci_screen_color_h.png"),
-                            id="plotly-image",
-                            style={
-                                "height": "60px",
-                                "width": "auto",
-                                "margin-bottom": "25px",
-                            },
-                        )
-                    ],
-                    className="one-third column",
-                ),
-                html.Div(
-                    [
                         html.Div(
                             [
                                 html.H3(
@@ -181,16 +180,6 @@ app.layout = html.Div(
                     ],
                     className="one-half column",
                     id="title",
-                ),
-                html.Div(
-                    [
-                        html.A(
-                            html.Button("somemoney", id="learn-more-button"),
-                            href="https://money.some.co.kr/",
-                        )
-                    ],
-                    className="one-third column",
-                    id="button",
                 ),
             ],
             id="header",
@@ -276,11 +265,6 @@ app.layout = html.Div(
                             id="info-container",
                             className="row container-display",
                         ),
-                        html.Div(
-                            [dcc.Graph(id="count_graph")],
-                            id="countGraphContainer",
-                            className="pretty_container",
-                        ),
                     ],
                     id="right-column",
                     className="eight columns",
@@ -346,18 +330,6 @@ def update_sector_count(input_sectorName):
     ],
 )
 def update_sector_count(input_sectorName, input_anal_date, input_comp_date, xaxis_option, yaxis_option):
-    stock_info_df = load_stock_info_df()
-    stock_info_df = stock_info_df[stock_info_df['sectorName'] == input_sectorName]
-    
-    stock_price_df = load_stock_price_df()
-
-    stock_price_df = stock_price_df[stock_price_df['date'] >= '20180101']
-
-    sector_df = pd.merge(stock_price_df, stock_info_df[['stockCode', 'stockName', 'sectorName']], on =['stockCode', 'stockName'])
-
-    date_df = sector_df[['date']].drop_duplicates()
-    date_df['date'] = date_df['date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
-    date_list = date_df['date'].unique().tolist()
     
     sector_sub_df = sector_df[sector_df['sectorName'] == input_sectorName]
 
