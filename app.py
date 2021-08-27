@@ -413,7 +413,27 @@ def update_sector_count(input_sectorName, input_anal_date, input_comp_date, xaxi
 
     sector_sub_comp_df2 = pd.merge(sector_sub_comp_df2, rsi_rslt_df[['RSI', 'stockName']], on=['stockName'])
     sector_sub_anal_df2 = pd.merge(sector_sub_anal_df2, rsi_rslt_df[['RSI', 'stockName']], on=['stockName'])
-
+    
+    # Create figure
+    #fig = go.Figure()
+    fig = make_subplots(rows=1, cols=2, subplot_titles=("비교시점", "분석시점"))
+    # Add traces
+    fig.add_trace(go.Scatter(x=sector_sub_comp_df2[xaxis_option],y=sector_sub_comp_df2[yaxis_option],
+                            mode="markers+text", text=sector_sub_comp_df2['stockName'],marker=dict(color=sector_sub_comp_df2['RSI'],coloraxis="coloraxis")),
+                row=1, col=1)
+    fig.add_trace(go.Scatter(x=[sector_sub_comp_df2[xaxis_option].mean()],y=[sector_sub_comp_df2[yaxis_option].mean()],
+                            mode="markers+text",text=['black'],marker=dict(color="black",symbol=4, size=12), name='평균'), row=1, col=1)
+    fig.add_trace(go.Scatter(x=sector_sub_anal_df2[xaxis_option],y=sector_sub_anal_df2[yaxis_option],
+                            mode="markers+text",text=sector_sub_anal_df2['stockName'],marker=dict(color=sector_sub_anal_df2['RSI'],coloraxis="coloraxis")),
+                row=1, col=2)
+    fig.add_trace(go.Scatter(x=[sector_sub_anal_df2[xaxis_option].mean()],y=[sector_sub_anal_df2[yaxis_option].mean()],
+                            mode="markers+text",text=['black'],marker=dict(color="black",symbol=4, size=12), name='평균'), row=1, col=2)
+    fig.update_traces(textposition='top center')
+    fig.update_layout(template='plotly_white', height=700,coloraxis=dict(colorscale='Bluered'), showlegend=False)    
+    # Set x-axis title
+    fig.update_xaxes(title_text="<b>{}</b>".format(xaxis_option))
+    # Set y-axes titles
+    fig.update_yaxes(title_text="<b>{}</b> ".format(yaxis_option))
     return sector_sub_anal_df2['1일전 대비 수익률'].mean().round(2), sector_sub_anal_df2['7일전 대비 수익률'].mean().round(2), stocks[0], stocks[1], fig
 
 # Main
