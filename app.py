@@ -133,8 +133,6 @@ def load_stock_price_df():
     return price_df
  
 stock_info_df = load_stock_info_df()
-stock_info_df = stock_info_df[stock_info_df['sectorName'] == input_sectorName]
-
 stock_price_df = load_stock_price_df()
 
 stock_price_df = stock_price_df[stock_price_df['date'] >= '20180101']
