@@ -1,4 +1,7 @@
-# Import required libraries
+# -*- coding: utf-8 -*-
+
+# Run this app with `python app.py` and
+# visit http://127.0.0.1:8050/ in your web browser.
 import pickle
 import copy
 import pathlib
@@ -105,7 +108,7 @@ def load_stock_info_df():
     - sectorName : 섹터명
     - industry_index_name : {시장}_{규모} (시장: Kospi/Kosdaq, 규모: L/M/S)
     '''
-    file_path = '/Users/munhyeonjong/Desktop/dash/stock/data/stock_list.json'
+    file_path = '{}/stock_list.json'.format(DATA_PATH)
     with open(file_path) as f:
         stock_list = [json.loads(line) for line in f]
     return pd.DataFrame(stock_list)
@@ -119,7 +122,7 @@ def load_stock_price_df():
     - stockCode : 종목코드
     - stockName : 종목명
     '''
-    file_path = '/Users/munhyeonjong/Desktop/dash/stock/data/stock_prices.pkl'
+    file_path = '{}/stock_prices.pkl'.format(DATA_PATH)
     price_df = pd.read_pickle(file_path)
 
     price_df = price_df.stack().reset_index()
