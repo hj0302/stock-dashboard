@@ -132,17 +132,6 @@ def load_stock_price_df():
     
     return price_df
 
-stock_info_df = load_stock_info_df()
-stock_price_df = load_stock_price_df()
-
-stock_price_df = stock_price_df[stock_price_df['date'] >= '20180101']
-
-sector_df = pd.merge(stock_price_df, stock_info_df[['stockCode', 'stockName', 'sectorName']], on =['stockCode', 'stockName'])
-
-date_df = sector_df[['date']].drop_duplicates()
-date_df['date'] = date_df['date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
-date_list = date_df['date'].unique().tolist()
-
 layout = dict(
     autosize=True,
     automargin=True,
@@ -357,6 +346,17 @@ def update_sector_count(input_sectorName):
     ],
 )
 def update_sector_count(input_sectorName, input_anal_date, input_comp_date, xaxis_option, yaxis_option):
+    stock_info_df = load_stock_info_df()
+    stock_price_df = load_stock_price_df()
+
+    stock_price_df = stock_price_df[stock_price_df['date'] >= '20180101']
+
+    sector_df = pd.merge(stock_price_df, stock_info_df[['stockCode', 'stockName', 'sectorName']], on =['stockCode', 'stockName'])
+
+    date_df = sector_df[['date']].drop_duplicates()
+    date_df['date'] = date_df['date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
+    date_list = date_df['date'].unique().tolist()
+    
     sector_sub_df = sector_df[sector_df['sectorName'] == input_sectorName]
 
     anal_ago_1_day,anal_ago_7_day,anal_ago_30_day,anal_ago_90_day,anal_ago_240_day,anal_ago_360_day = setting_date(input_anal_date)
