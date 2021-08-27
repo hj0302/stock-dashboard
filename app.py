@@ -135,7 +135,7 @@ def load_stock_price_df():
 stock_info_df = load_stock_info_df()
 stock_price_df = load_stock_price_df()
 
-stock_price_df = stock_price_df[stock_price_df['date'] >= '20150101']
+stock_price_df = stock_price_df[stock_price_df['date'] >= '20180101']
 
 sector_df = pd.merge(stock_price_df, stock_info_df[['stockCode', 'stockName', 'sectorName']], on =['stockCode', 'stockName'])
 
