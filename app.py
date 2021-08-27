@@ -347,6 +347,8 @@ def update_sector_count(input_sectorName):
 )
 def update_sector_count(input_sectorName, input_anal_date, input_comp_date, xaxis_option, yaxis_option):
     stock_info_df = load_stock_info_df()
+    stock_info_df = stock_info_df[stock_info_df['sectorName'] == input_sectorName]
+    
     stock_price_df = load_stock_price_df()
 
     stock_price_df = stock_price_df[stock_price_df['date'] >= '20180101']
