@@ -51,7 +51,7 @@ sector_options = [
 time_options = [
     {"label": time, "value": time} for time in time_list
 ]
-@profile
+
 def check_closed_day(day):
     while True:
         if day in date_list :
@@ -61,7 +61,7 @@ def check_closed_day(day):
             day = datetime.datetime.strftime(day, '%Y-%m-%d')
 
 # 입력일자가 토요일, 일요일이면 해당 주 금요일로 변경하는 함수 
-@profile
+
 def check_week(day):
     week_day = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
     
@@ -75,7 +75,7 @@ def check_week(day):
         return datetime.datetime.strftime(day, '%Y-%m-%d')
 
 # 분석일자 세팅하는 함수
-@profile
+
 def setting_date(date):
     ago_1_day = datetime.datetime.strptime(date, '%Y-%m-%d') - datetime.timedelta(days=1)#하루전
     ago_7_day = datetime.datetime.strptime(date, '%Y-%m-%d') - datetime.timedelta(weeks=1)#일주일전
@@ -103,7 +103,7 @@ def setting_date(date):
 
 # Load data
 # 종목 리스트 (안에 섹터정보 포함)
-@profile
+
 def load_stock_info_df():
     '''
     주요 필드
@@ -118,7 +118,7 @@ def load_stock_info_df():
     return pd.DataFrame(stock_list)
 
 # 일별/종목별 주가 테이블
-@profile
+
 def load_stock_price_df():
     '''
     테이블 형식
@@ -127,13 +127,9 @@ def load_stock_price_df():
     - stockCode : 종목코드
     - stockName : 종목명
     '''
-<<<<<<< HEAD
-    file_path = '{}/stock_prices.pkl'.format(DATA_PATH)
-=======
-    file_path = '{}/stock_2018_prices.pkl'.format(DATA_PATH)
->>>>>>> 76719495834d87139b0fe022ae1b9656f277c5e8
+
+    file_path = '{}/stock_2018_prices.pkl'.format(DATA_PATH)8
     price_df = pd.read_pickle(file_path)
-    price_df
 
     #price_df = price_df.stack().reset_index()
     #price_df.columns = ['date', 'Code_Name', 'price']
@@ -322,13 +318,13 @@ app.layout = html.Div(
     id="mainContainer",
     style={"display": "flex", "flex-direction": "column"},
 )
-@profile
+
 def update_date(date_value):
     if date_value is not None:
         date_object = date.fromisoformat(date_value)
         date_string = date_object.strftime('%Y-%m-%d')
         return date_string
-@profile
+
 def calc_RSI(df, period):
     U = np.where(df.diff(1)['price'] >  0, df.diff(1)['price'], 0)
     D = np.where(df.diff(1)['price'] <  0, df.diff(1)['price'] * (-1), 0)
@@ -339,7 +335,6 @@ def calc_RSI(df, period):
     return RSI
 
 # Selectors -> well text
-@profile
 @app.callback(
     Output("sector_count", "children"),
     [
@@ -353,7 +348,6 @@ def update_sector_count(input_sectorName):
     return sector_n_count
 
 # Selectors -> well text
-@profile
 @app.callback(
     Output("ago_1_earnings", "children"),
     Output("ago_7_earnings", "children"),
@@ -368,7 +362,6 @@ def update_sector_count(input_sectorName):
         Input("y_option", "value"),
     ],
 )
-@profile
 def update_sector_count(input_sectorName, input_anal_date, input_comp_date, xaxis_option, yaxis_option):
     
     sector_sub_df = sector_df[sector_df['sectorName'] == input_sectorName]
