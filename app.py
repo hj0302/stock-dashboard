@@ -122,13 +122,13 @@ def load_stock_price_df():
     - stockCode : 종목코드
     - stockName : 종목명
     '''
-    file_path = '{}/stock_prices.pkl'.format(DATA_PATH)
+    file_path = '{}/stock_2018_prices.pkl'.format(DATA_PATH)
     price_df = pd.read_pickle(file_path)
 
-    price_df = price_df.stack().reset_index()
-    price_df.columns = ['date', 'Code_Name', 'price']
-    price_df[['stockCode', 'stockName']]  = price_df['Code_Name'].str.split('_',expand=True)
-    price_df.drop('Code_Name', axis=1, inplace=True)
+    #price_df = price_df.stack().reset_index()
+    #price_df.columns = ['date', 'Code_Name', 'price']
+    #price_df[['stockCode', 'stockName']]  = price_df['Code_Name'].str.split('_',expand=True)
+    #price_df.drop('Code_Name', axis=1, inplace=True)
     
     return price_df
  
@@ -164,6 +164,20 @@ app.layout = html.Div(
             [
                 html.Div(
                     [
+                        html.Img(
+                            src=app.get_asset_url("vaivcompany_ci_screen_color_h.png"),
+                            id="plotly-image",
+                            style={
+                                "height": "60px",
+                                "width": "auto",
+                                "margin-bottom": "25px",
+                            },
+                        )
+                    ],
+                    className="one-third column",
+                ),
+                html.Div(
+                    [
                         html.Div(
                             [
                                 html.H3(
@@ -178,6 +192,16 @@ app.layout = html.Div(
                     ],
                     className="one-half column",
                     id="title",
+                ),
+                html.Div(
+                    [
+                        html.A(
+                            html.Button("somemoney", id="learn-more-button"),
+                            href="https://money.some.co.kr/",
+                        )
+                    ],
+                    className="one-third column",
+                    id="button",
                 ),
             ],
             id="header",
@@ -263,9 +287,23 @@ app.layout = html.Div(
                             id="info-container",
                             className="row container-display",
                         ),
+                        html.Div(
+                            [dcc.Graph(id="count_graph")],
+                            id="countGraphContainer",
+                            className="pretty_container",
+                        ),
                     ],
                     id="right-column",
                     className="eight columns",
+                ),
+            ],
+            className="row flex-display",
+        ),
+        html.Div(
+            [
+                html.Div(
+                    [dcc.Graph(id="main_graph")],
+                    className="pretty_container twelve columns",
                 ),
             ],
             className="row flex-display",
@@ -370,7 +408,7 @@ def update_sector_count(input_sectorName, input_anal_date, input_comp_date, xaxi
     sector_sub_comp_df2 = pd.merge(sector_sub_comp_df2, rsi_rslt_df[['RSI', 'stockName']], on=['stockName'])
     sector_sub_anal_df2 = pd.merge(sector_sub_anal_df2, rsi_rslt_df[['RSI', 'stockName']], on=['stockName'])
 
-    return sector_sub_anal_df2['1일전 대비 수익률'].mean().round(2), sector_sub_anal_df2['7일전 대비 수익률'].mean().round(2), stocks[0], stocks[1]
+    return sector_sub_anal_df2['1일전 대비 수익률'].mean().round(2), sector_sub_anal_df2['7일전 대비 수익률'].mean().round(2), stocks[0], stocks[1], fig
 
 # Main
 if __name__ == "__main__":
