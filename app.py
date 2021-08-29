@@ -422,12 +422,12 @@ def update_sector_count(input_sectorName, input_anal_date, input_comp_date, xaxi
                             mode="markers+text", text=sector_sub_comp_df2['stockName'],marker=dict(color=sector_sub_comp_df2['RSI'],coloraxis="coloraxis")),
                 row=1, col=1)
     fig.add_trace(go.Scatter(x=[sector_sub_comp_df2[xaxis_option].mean()],y=[sector_sub_comp_df2[yaxis_option].mean()],
-                            mode="markers+text",text=['black'],marker=dict(color="black",symbol=4, size=12), name='평균'), row=1, col=1)
+                            mode="markers+text",text=['섹터 평균'],marker=dict(color="black",symbol=4, size=12), name='평균'), row=1, col=1)
     fig.add_trace(go.Scatter(x=sector_sub_anal_df2[xaxis_option],y=sector_sub_anal_df2[yaxis_option],
                             mode="markers+text",text=sector_sub_anal_df2['stockName'],marker=dict(color=sector_sub_anal_df2['RSI'],coloraxis="coloraxis")),
                 row=1, col=2)
     fig.add_trace(go.Scatter(x=[sector_sub_anal_df2[xaxis_option].mean()],y=[sector_sub_anal_df2[yaxis_option].mean()],
-                            mode="markers+text",text=['black'],marker=dict(color="black",symbol=4, size=12), name='평균'), row=1, col=2)
+                            mode="markers+text",text=['섹터 평균'],marker=dict(color="black",symbol=4, size=12), name='평균'), row=1, col=2)
     fig.update_traces(textposition='top center')
     fig.update_layout(template='plotly_white', height=700,coloraxis=dict(colorscale='Bluered'), showlegend=False)    
     # Set x-axis title
