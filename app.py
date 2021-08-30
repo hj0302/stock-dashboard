@@ -434,7 +434,7 @@ def update_sector_count(input_sectorName, input_anal_date, input_comp_date, xaxi
     fig.update_xaxes(title_text="<b>{}</b>".format(xaxis_option))
     # Set y-axes titles
     fig.update_yaxes(title_text="<b>{}</b> ".format(yaxis_option))
-    return sector_sub_anal_df2['1일전 대비 수익률'].mean().round(2), sector_sub_anal_df2['7일전 대비 수익률'].mean().round(2), stocks[0], stocks[1], fig
+    return sector_sub_anal_df2['1일전 대비 수익률'].mean().round(2), sector_sub_anal_df2['7일전 대비 수익률'].mean().round(2), stocks[0] + '%', stocks[1] + '%', fig
 
 # Main
 if __name__ == "__main__":
