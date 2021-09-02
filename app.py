@@ -233,7 +233,7 @@ app.layout = html.Div(
                                 {'label': 'E', 'value': 'E'}
                             ],
                             multi=True,
-                            value="L"
+                            value=["L","M"]
                         ),
                         html.P("분석일 :", className="control_label"),
                         dcc.DatePickerSingle(
@@ -248,21 +248,21 @@ app.layout = html.Div(
                             id='comp-date-picker-single',
                             min_date_allowed=date(2000, 1, 2),
                             max_date_allowed=date(2021, 8, 25),
-                            initial_visible_month=date(2021, 1, 12),
-                            date=date(2021, 1, 12),
+                            initial_visible_month=date(2021, 6, 11),
+                            date=date(2021, 6, 11),
                         ),
                         html.P("x축 Select:", className="control_label"),
                         dcc.Dropdown(
                             id="x_option",
                             options=axis_options,
-                            value='7일전 대비 수익률',
+                            value='1달전 대비 수익률',
                             className="dcc_control",
                         ),
                         html.P("y축 Select:", className="control_label"),
                         dcc.Dropdown(
                             id="y_option",
                             options=axis_options,
-                            value='1달전 대비 수익률',
+                            value='7일전 대비 수익률',
                             className="dcc_control",
                         ),
                     ],
@@ -337,6 +337,15 @@ app.layout = html.Div(
             ],
             className="row flex-display",
         ),
+        html.Div(
+            [
+                html.Div(
+                    [html.P("종목별 종가 추이"), dcc.Graph(id="sub_line_graph")],
+                    className="pretty_container twelve columns",
+                ),
+            ],
+            className="row flex-display",
+        ),
     ],
     id="mainContainer",
     style={"display": "flex", "flex-direction": "column"},
@@ -362,12 +371,22 @@ def calc_RSI(df, period):
     Output("sector_count", "children"),
     [
         Input("sector_option", "value"),
+        Input("market-dynamic-dropdown", "value"),
+        Input("scale-dynamic-dropdown", "value"),
     ],
 )
-def update_sector_count(input_sectorName):
+def update_sector_count(input_sectorName, mareket_option, scale_option):
+    if isinstance(mareket_option, list) == False:
+        mareket_option = mareket_option.split(',')
+    if isinstance(scale_option, list) == False:
+        scale_option = scale_option.split(',')
+
     sector_sub_df = stock_info_df[stock_info_df['sectorName'] == input_sectorName]
+    sector_sub_df = sector_sub_df[sector_sub_df['Market'].isin(mareket_option)]
+    sector_sub_df = sector_sub_df[sector_sub_df['Scale'].isin(scale_option)]
     sector_n_count = sector_sub_df['stockCode'].nunique()
     return sector_n_count
+
 
 @app.callback(
     Output('sector_index_graph', 'figure'),
@@ -377,6 +396,7 @@ def update_sector_count(input_sectorName):
 )
 def update_sector_index_graph(input_sectorName):    
     df = stock_index_df[stock_index_df['sectorName'] == input_sectorName]
+    df = df[df['date'] >= '2015-01-01'] 
     # Create figure
     #fig = go.Figure()
     fig = make_subplots(rows=1, cols=1)
@@ -385,7 +405,7 @@ def update_sector_index_graph(input_sectorName):
                              line=dict(shape="linear", color="#1c751c") #spline
                              ), row=1, col=1)
 
-    fig.update_layout(template='plotly_white', height=500,
+    fig.update_layout(template='plotly_white', height=400,
                       xaxis=dict(
                           rangeselector=dict(
                               buttons=list([
@@ -396,7 +416,7 @@ def update_sector_index_graph(input_sectorName):
                                   ]
                                 )
                             ),
-                    rangeslider=dict(visible=True),
+                    rangeslider=dict(visible=False),
                     type="date"
                     )
                 )    
@@ -509,7 +529,7 @@ def update_main_graph(input_sectorName, input_anal_date, mareket_option, scale_o
             mode="markers+text",
             text=sector_sub_anal_df2['stockName'],
             marker=dict(color=sector_sub_anal_df2['RSI'],
-            coloraxis="coloraxis"
+            coloraxis="coloraxis",
             )
         )
     )
@@ -536,17 +556,29 @@ def update_main_graph(input_sectorName, input_anal_date, mareket_option, scale_o
     )
     fig.update_layout(
         template='plotly_white', 
-        height=700,
-        coloraxis=dict(colorscale='Bluered'),
+        height=500,
+        coloraxis=dict(colorscale='Bluered', cmax=100, cmin=0),
         showlegend=False,
         margin={'l': 20, 'r': 0, 'b': 15, 't': 5},
         dragmode='select',
-        hovermode=False
+        hovermode=False,
     )    
+    x_max_range = 30
+    x_min_range = -30
+    y_max_range = 15
+    y_min_range = -15
+    if sector_sub_anal_df2[xaxis_option].max() >= 30 :
+        x_max_range = sector_sub_anal_df2[xaxis_option].max() + 3
+    if sector_sub_anal_df2[xaxis_option].min() <= -30 :
+        x_min_range = sector_sub_anal_df2[xaxis_option].min() - 3
+    if sector_sub_anal_df2[yaxis_option].max() >= 15 :
+        y_max_range = sector_sub_anal_df2[xaxis_option].max() + 3
+    if sector_sub_anal_df2[yaxis_option].min() <= -15 :
+        y_min_range = sector_sub_anal_df2[xaxis_option].min() -3 
     # Set x-axis title
-    fig.update_xaxes(title_text="<b>{}</b>".format(xaxis_option),range=[-30, 30])
+    fig.update_xaxes(title_text="<b>{}</b>".format(xaxis_option), range=[x_min_range, x_max_range])
     # Set y-axes titles
-    fig.update_yaxes(title_text="<b>{}</b> ".format(yaxis_option),range=[-30, 30])
+    fig.update_yaxes(title_text="<b>{}</b> ".format(yaxis_option), range=[y_min_range, y_max_range])
 
     rate1 = str(sector_sub_anal_df2['1일전 대비 수익률'].mean().round(2))+'%'
     rate2 = str(sector_sub_anal_df2['7일전 대비 수익률'].mean().round(2))+'%'
@@ -662,27 +694,104 @@ def update_main_graph2(input_sectorName, input_comp_date, mareket_option, scale_
         customdata=sector_sub_comp_df2.index,
         mode='markers+text', 
         #marker={ 'color': 'rgba(0, 116, 217, 0.7)', 'size': 20 }, 
-        unselected={'marker': { 'opacity': 0.3 }, 'textfont': { 'color': 'rgba(0, 0, 0, 0)' }},
-        textposition='top center'
-        )
+        textposition='top center',
+        unselected={
+            'marker': { 'opacity': 0.3 }, 
+            'textfont': { 'color': 'rgba(0, 0, 0, 0)'},
+        },
+    )
     fig.update_layout(
-        template='plotly_white',
-        height=700,
-        coloraxis=dict(colorscale='Bluered'),
+        template='plotly_white', 
+        height=500,
+        coloraxis=dict(colorscale='Bluered', cmax=100, cmin=0),#, tickvals=[0,20,40,60,80,100],ticktext=["0","20","40","60","80","100"]
         showlegend=False,
         margin={'l': 20, 'r': 0, 'b': 15, 't': 5},
         dragmode='select',
-        hovermode=False) 
+        hovermode=False,
+    ) 
     fig.update_coloraxes(showscale=False)
 
+
+    x_max_range = 30
+    x_min_range = -30
+    y_max_range = 15
+    y_min_range = -15
+    if sector_sub_comp_df2[xaxis_option].max() >= 30 :
+        x_max_range = sector_sub_comp_df2[xaxis_option].max() + 3
+    if sector_sub_comp_df2[xaxis_option].min() <= -30 :
+        x_min_range = sector_sub_comp_df2[xaxis_option].ming() - 3
+    if sector_sub_comp_df2[yaxis_option].max() >= 15 :
+        y_max_range = sector_sub_comp_df2[xaxis_option].ming() + 3
+    if sector_sub_comp_df2[yaxis_option].min() <= -15 :
+        y_min_range = sector_sub_comp_df2[xaxis_option].min() - 3
     # Set x-axis title
-    fig.update_xaxes(title_text="<b>{}</b>".format(xaxis_option), range=[-30, 30])
+    fig.update_xaxes(title_text="<b>{}</b>".format(xaxis_option), range=[x_min_range, x_max_range])
     # Set y-axes titles
-    fig.update_yaxes(title_text="<b>{}</b> ".format(yaxis_option), range=[-30, 30])
+    fig.update_yaxes(title_text="<b>{}</b> ".format(yaxis_option), range=[y_min_range, y_max_range])
 
     return fig
 
+@app.callback(
+    Output('sub_line_graph', 'figure'),
+    [
+        Input("anal-date-picker-single", "date"),
+        Input("comp-date-picker-single", "date"),
+        Input("main_scatter_graph1", "selectedData"),
+        Input("main_scatter_graph2", "selectedData"),
+    ],
+)
+def update_sub_graph(input_anal_date, input_comp_date, selection1, selection2):
+    color_list = ["#B71C1C","#1A237E","#A1D99B","#006064","#F57F17","#BF360C","#FDBF6F","#FC9272","#D0D1E6","#ABD9E9","#3690C0","#F87A72","#CA6BCC","#DD3497","#4EB3D3","#FFFF33","#FB9A99","#A6D853","#D4B9DA","#AEB0B8","#CCCCCC","#EAE5D9","#C29A84"]
+    fig = make_subplots(rows=1, cols=1)
+    
+    if selection1 == None:
+        selection1 = {'points': [{'curveNumber': 0, 'pointNumber': 1, 'pointIndex': 1, 'x': -5.26, 'y': 2.44, 'customdata': 1, 'text': '삼성전자'}, {'curveNumber': 2, 'pointNumber': 0, 'pointIndex': 0, 'x': -10.555, 'y': 0.98, 'customdata': 0, 'text': '섹터 평균'}], 'range': {'x': [-13.614833843393493, 7.796883675586598], 'y': [0.5452102168237216, 3.02651605874812]}}
+    if selection2 == None :
+        selection2 = {'points': [{'curveNumber': 0, 'pointNumber': 1, 'pointIndex': 1, 'x': -5.26, 'y': 2.44, 'customdata': 1, 'text': '삼성전자'}, {'curveNumber': 2, 'pointNumber': 0, 'pointIndex': 0, 'x': -10.555, 'y': 0.98, 'customdata': 0, 'text': '섹터 평균'}], 'range': {'x': [-13.614833843393493, 7.796883675586598], 'y': [0.5452102168237216, 3.02651605874812]}}
+    selection1.update(selection2)
+    for i,color in zip(selection1['points'],color_list):
+        if i['text'] == '섹터 평균':
+            pass
+        else:
+            print(i['text'])
+            # 삼성전자의 20210501~20210520의 주가데이터
+            #a_name = stock_info_df[stock_info_df['stockName'] == '{}'.format(i['text'])]['stockCode'].tolist()[0]
+            #a_name = a_name[1:]
+            #df = stock.get_market_ohlcv_by_date(fromdate="20190501", todate="20210831", ticker=a_name)
+            #time.sleep(1)
+            #df = df.reset_index()
+            
+            df = stock_price_df[stock_price_df['stockName'] == i['text']] 
+            # Add traces
+            fig.add_trace(go.Scatter(x=df['date'], y=df['price'], mode="lines",
+                                    line=dict(shape="linear", color=color),name= i['text'],#spline
+                                    ), row=1, col=1)
 
+
+    fig.update_layout(template='plotly_white', height=500,
+                    xaxis=dict(
+                        rangeselector=dict(
+                            buttons=list([
+                                dict(count=1, label="1m", step="month", stepmode="backward"),
+                                dict(count=6, label="6m", step="month", stepmode="backward"),
+                                dict(count=1, label="1y", step="year", stepmode="backward"),
+                                dict(step="all")
+                                ]
+                                )
+                            ),
+                    rangeslider=dict(visible=True),
+                    type="date",
+                    )
+            ) 
+    # Set x-axis title
+    fig.update_xaxes(title_text="<b>{}</b>".format('날짜'))
+    # Set y-axes titles
+    fig.update_yaxes(title_text="<b>{}</b> ".format('종가(Closed)'))
+
+    fig.add_vline(x=input_anal_date, line_width=3, line_dash="dash", line_color="blue")
+    fig.add_vline(x=input_comp_date, line_width=3, line_dash="dash", line_color="red")
+
+    return fig
 # Main
 if __name__ == "__main__":
     app.run_server(debug=True)
