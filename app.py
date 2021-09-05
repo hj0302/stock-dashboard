@@ -131,7 +131,7 @@ def load_sector_index_df():
     - setorIndex : index
     - stockName : 종목명
     '''
-    file_path = '{}/sectorIndex.pkl'.format(DATA_PATH)
+    file_path = '{}/sectorIndex2.pkl'.format(DATA_PATH)
     index_df = pd.read_pickle(file_path)
     
     index_df['date'] = index_df['date'].apply(lambda x : '{}-{}-{}'.format(x[:4], x[4:6],x[6:]))
